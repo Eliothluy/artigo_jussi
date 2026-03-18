@@ -1,0 +1,4 @@
+ueId,sliceId,bwpId,avgThroughputMbps,avgDelayMs,packetLossRatio,txBytes,rxBytes,txPackets,rxPackets
+4,0,0,24.1892,13.5297,0.00150901,30282168,30236472,21206,21174
+5,1,0,0,0,1,12672,0,99,0
+6,1,0,0,0,1,12672,0,99,0

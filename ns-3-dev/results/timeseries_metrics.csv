@@ -1,0 +1,2 @@
+timestampSeconds,sliceId,sliceName,activeFlows,rxBytesCumulative,txBytesCumulative,windowThroughputMbps,avgDelayMs,packetLossRatio
+NOTE: Time-series not implemented in this version - set m_numBwp > 1 and implement sampling for future versions

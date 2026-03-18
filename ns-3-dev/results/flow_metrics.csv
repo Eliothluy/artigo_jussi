@@ -1,0 +1,4 @@
+flowId,ueId,sliceId,bwpId,direction,sourceIp,destIp,sourcePort,destPort,protocol,txBytes,rxBytes,txPackets,rxPackets,delayMeanMs,jitterMeanMs,packetLossRatio
+5,4,0,0,0,1.0.0.2,7.0.0.2,49153,1234,UDP,30282168,30236472,21206,21174,13.5297,0.494566,0.00150901
+6,5,1,0,1,7.0.0.3,1.0.0.2,49153,5678,UDP,12672,0,99,0,0,0,1
+7,6,1,0,1,7.0.0.4,1.0.0.2,49153,5678,UDP,12672,0,99,0,0,0,1
