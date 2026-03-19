@@ -1,3 +1,3 @@
 sliceId,sliceName,throughputAggregatedMbps,throughputPerUeMbps,avgLatencyMs,packetDeliveryRatio,packetLossRatio,activeFlows,totalTxBytes,totalRxBytes,effectiveShare
-0,eMBB,48.095,24.0475,13.5608,0.992456,0.00754361,2,12115152,12023760,0.5
-1,mMTC,0.002048,0.001024,16.2786,1,0,2,512,512,0.5
+0,eMBB,70.6974,7.06974,3588.57,0.280035,0.719965,10,315573720,88371780,0.5
+1,mMTC,0.01024,0.001024,14.9928,1,0,10,12800,12800,0.5

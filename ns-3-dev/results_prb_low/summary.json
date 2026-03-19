@@ -2,7 +2,7 @@
   "simulation": {
     "seed": 1,
     "runNumber": 1,
-    "durationSeconds": 2
+    "durationSeconds": 10
   },
   "configuration": {
     "totalUes": 4,
@@ -24,30 +24,30 @@
     "mmtcEffectiveShare": 0.5
   },
   "eMBB": {
-    "throughputAggregatedMbps": 48.095,
-    "throughputPerUeMbps": 24.0475,
-    "avgLatencyMs": 13.5608,
-    "packetDeliveryRatio": 0.992456,
-    "packetLossRatio": 0.00754361,
+    "throughputAggregatedMbps": 50.4187,
+    "throughputPerUeMbps": 25.2093,
+    "avgLatencyMs": 13.5353,
+    "packetDeliveryRatio": 0.998552,
+    "packetLossRatio": 0.00144803,
     "activeFlows": 2,
-    "totalTxBytes": 12115152,
-    "totalRxBytes": 12023760
+    "totalTxBytes": 63114744,
+    "totalRxBytes": 63023352
   },
   "mMTC": {
     "throughputAggregatedMbps": 0.002048,
-    "avgLatencyMs": 16.2786,
+    "avgLatencyMs": 14.9786,
     "packetDeliveryRatio": 1,
     "packetLossRatio": 0,
     "activeFlows": 2,
-    "totalTxBytes": 512,
-    "totalRxBytes": 512
+    "totalTxBytes": 2560,
+    "totalRxBytes": 2560
   },
   "slaVerification": {
     "embbThroughputTargetMbps": 25,
-    "embbThroughputPerUeMbps": 24.0475,
-    "embbThroughputSlaMet": false,
+    "embbThroughputPerUeMbps": 25.2093,
+    "embbThroughputSlaMet": true,
     "embbLatencyTargetMs": 100,
-    "embbLatencyMs": 13.5608,
+    "embbLatencyMs": 13.5353,
     "embbLatencySlaMet": true
   },
   "limitations": [

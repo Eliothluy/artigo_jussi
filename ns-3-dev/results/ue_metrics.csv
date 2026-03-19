@@ -1,3 +1,5 @@
-ueId,sliceId,bwpId,avgThroughputMbps,avgDelayMs,packetLossRatio,txBytes,rxBytes,txPackets,rxPackets
-4,0,0,24.0475,13.5614,0.00754361,6057576,6011880,4242,4210
-5,1,1,0.001024,29.0286,0,256,256,2,2
+ueId,sliceId,throughputMbps,avgDelayMs,packetLossRatio,txBytes,rxBytes,txPackets,rxPackets
+4,0,24.0475,13.5608,0.00754361,6057576,6011880,4242,4210
+5,0,24.0475,13.5608,0.00754361,6057576,6011880,4242,4210
+6,1,0.001024,15.0286,0,256,256,2,2
+7,1,0.001024,17.5286,0,256,256,2,2

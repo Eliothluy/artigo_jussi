@@ -13,7 +13,8 @@ This is a research codebase for simulating O-RAN (Open Radio Access Network) and
   - `contrib/oran-interface/`: O-RAN E2 interface integration module by Northeastern University
 - **oran-e2sim/**: Custom fork of OSC e2sim library for E2 interface simulation within ns-3
 - **scratch/**: Custom simulation scenarios:
-  - `oran_slicing_bwp.cc`: O-RAN aligned network slicing with BWP-based physical isolation (RSLAQ compliant)
+  - `oran_slicing_bwp.cc`: O-RAN aligned network slicing with BWP-based physical isolation (RSLAQ compliant) - 2 BWPs
+  - `oran_slicing_prb.cc`: Slice-aware PRB/RBG scheduling with 1 shared BWP and MAC-level slicing
   - `baseline_slicing_two_slices_fixed.cc`: Baseline 5G-LENA simulation without RIC components
 
 ## Build System
@@ -33,6 +34,7 @@ This is a research codebase for simulating O-RAN (Open Radio Access Network) and
 # Run examples
 ./ns3 run cttc-nr-demo
 ./ns3 run scratch/oran_slicing_bwp
+./ns3 run scratch/oran_slicing_prb
 ./ns3 run scratch/baseline_slicing_two_slices_fixed
 ```
 
@@ -143,6 +145,7 @@ Example format:
 
 # Custom scratch simulations
 ./ns3 run scratch/oran_slicing_bwp
+./ns3 run scratch/oran_slicing_prb
 ./ns3 run scratch/baseline_slicing_two_slices_fixed
 ```
 
@@ -166,6 +169,18 @@ Example format:
 ```
 
 ## Dependencies
+
+### Custom Scheduler: NrMacSchedulerOfdmaSliceQos
+
+Located in `contrib/nr/model/nr-mac-scheduler-ofdma-slice-qos.{h,cc}`:
+
+- Inherits from `NrMacSchedulerOfdmaQos`
+- Slice-aware RBG partitioning within a single shared BWP
+- RSLAQ-inspired: 50% static (weighted) + 50% dynamic (configurable)
+- Work-conserving: unused resources redistributed across slices
+- Slice identification via QCI (eMBB: QCI=6, mMTC: QCI=80)
+- Configurable attributes: `EmbbStaticWeight`, `MmtcStaticWeight`, `EmbbDynamicShare`, `MmtcDynamicShare`, `StaticPortion`
+- API for DRL/xApp integration: `SetSliceStaticWeight()`, `SetSliceDynamicShare()`, `GetSliceMetrics()`
 
 ### NR Module Additional Requirements
 

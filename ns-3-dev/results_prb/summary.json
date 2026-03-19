@@ -2,12 +2,12 @@
   "simulation": {
     "seed": 1,
     "runNumber": 1,
-    "durationSeconds": 2
+    "durationSeconds": 10
   },
   "configuration": {
-    "totalUes": 4,
-    "embbUes": 2,
-    "mmTcUes": 2,
+    "totalUes": 20,
+    "embbUes": 10,
+    "mmTcUes": 10,
     "scheduler": "ns3::NrMacSchedulerOfdmaSliceQos",
     "bwpConfiguration": "1x20MHz",
     "sliceImplementation": "slice_aware_rbg",
@@ -24,31 +24,31 @@
     "mmtcEffectiveShare": 0.5
   },
   "eMBB": {
-    "throughputAggregatedMbps": 48.095,
-    "throughputPerUeMbps": 24.0475,
-    "avgLatencyMs": 13.5608,
-    "packetDeliveryRatio": 0.992456,
-    "packetLossRatio": 0.00754361,
-    "activeFlows": 2,
-    "totalTxBytes": 12115152,
-    "totalRxBytes": 12023760
+    "throughputAggregatedMbps": 70.6974,
+    "throughputPerUeMbps": 7.06974,
+    "avgLatencyMs": 3588.57,
+    "packetDeliveryRatio": 0.280035,
+    "packetLossRatio": 0.719965,
+    "activeFlows": 10,
+    "totalTxBytes": 315573720,
+    "totalRxBytes": 88371780
   },
   "mMTC": {
-    "throughputAggregatedMbps": 0.002048,
-    "avgLatencyMs": 16.2786,
+    "throughputAggregatedMbps": 0.01024,
+    "avgLatencyMs": 14.9928,
     "packetDeliveryRatio": 1,
     "packetLossRatio": 0,
-    "activeFlows": 2,
-    "totalTxBytes": 512,
-    "totalRxBytes": 512
+    "activeFlows": 10,
+    "totalTxBytes": 12800,
+    "totalRxBytes": 12800
   },
   "slaVerification": {
     "embbThroughputTargetMbps": 25,
-    "embbThroughputPerUeMbps": 24.0475,
+    "embbThroughputPerUeMbps": 7.06974,
     "embbThroughputSlaMet": false,
     "embbLatencyTargetMs": 100,
-    "embbLatencyMs": 13.5608,
-    "embbLatencySlaMet": true
+    "embbLatencyMs": 3588.57,
+    "embbLatencySlaMet": false
   },
   "limitations": [
     "RBG-level granularity (not PRB-level) - native 5G-LENA constraint",
