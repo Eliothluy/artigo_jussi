@@ -1,13 +1,18 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * O-RAN Slice-Aware PRB/RBG Scheduling (1 BWP Shared)
+ * O-RAN Slice-Aware PRB/RBG Scheduling (1 BWP Shared) with 3GPP Video Traffic
  *
  * Implements network slicing using:
  *   - Single CC with 1 shared BWP (full bandwidth)
- *   - NrMacSchedulerOfdmaSliceQos for slice-aware RBG partitioning
+ *   - NrMacSchedulerOfdmaSliceQos for slice-aware RBG partitioning (DL and UL)
  *   - 2 slices: eMBB (QCI 6) + mMTC (QCI 80)
  *   - RSLAQ-inspired: 50% static (weighted) + 50% dynamic (shared)
  *   - Work-conserving: unused resources redistributed across slices
+ *   - 200 MHz BWP, numerology 2 (60 kHz SCS) for video streaming
+ *
+ * Video Traffic Model:
+ *   - eMBB: 3GPP TR 38.838 generic video model (frames, adaptive rate)
+ *   - DOWNLINK direction (remoteHost -> UE) to work around NR UL issues
  *
  * Baseline reference: oran_slicing_bwp.cc (2 BWPs, physical isolation)
  * This scenario: 1 BWP, logical slicing at MAC scheduler level
@@ -28,6 +33,7 @@
 #include "ns3/nr-eps-bearer-tag.h"
 #include "ns3/nr-module.h"
 #include "ns3/point-to-point-module.h"
+#include "ns3/traffic-generator-3gpp-generic-video.h"
 
 #include <fstream>
 #include <map>
@@ -37,7 +43,7 @@
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE("OranSlicingPrb");
+NS_LOG_COMPONENT_DEFINE("OranSlicingPrbVideo");
 
 // Global maps for flow identification
 static std::map<Ipv4Address, uint32_t> g_ipToUeMap;
@@ -130,13 +136,20 @@ int main(int argc, char* argv[])
     uint32_t nMmTcUes = 10;
     double ueDistance = 100.0;
 
-    std::string embbDataRate = "25Mbps";
+    // 3GPP Video parameters
+    std::string videoMinDataRate = "5Mbps";
+    std::string videoMaxDataRate = "10Mbps";
+    uint32_t videoMinFps = 30;
+    uint32_t videoMaxFps = 60;
+    uint32_t videoAvgFps = 30;
+    std::string videoAvgDataRate = "7.5Mbps";
+
     uint32_t mmTcPacketSize = 100;
     double mmTcInterval = 1.0;
 
-    uint8_t numerology = 0;
+    uint8_t numerology = 2;     // 60 kHz SCS (standard for 200 MHz at 3.5 GHz)
     double centralFrequency = 3.5e9;
-    double bandwidth = 20e6;
+    double bandwidth = 200e6;   // 200 MHz for high-bandwidth video streaming
     double totalTxPower = 43;
 
     std::string outputDir = "results";
@@ -147,7 +160,7 @@ int main(int argc, char* argv[])
     double embbDynamicShare = 0.5;
     double mmtcDynamicShare = 0.5;
 
-    double embbSlaThroughputMbps = 25.0;
+    double embbSlaThroughputMbps = 7.5;  // Updated to match avg video rate
     double embbSlaLatencyMs = 100.0;
 
     CommandLine cmd(__FILE__);
@@ -157,7 +170,12 @@ int main(int argc, char* argv[])
     cmd.AddValue("nEmbbUes", "Number of eMBB UEs", nEmbbUes);
     cmd.AddValue("nMmTcUes", "Number of mMTC UEs", nMmTcUes);
     cmd.AddValue("ueDistance", "UE distance from gNB (m)", ueDistance);
-    cmd.AddValue("embbDataRate", "eMBB offered rate per UE", embbDataRate);
+    cmd.AddValue("videoMinDataRate", "3GPP video min data rate", videoMinDataRate);
+    cmd.AddValue("videoMaxDataRate", "3GPP video max data rate", videoMaxDataRate);
+    cmd.AddValue("videoAvgDataRate", "3GPP video avg data rate", videoAvgDataRate);
+    cmd.AddValue("videoMinFps", "3GPP video min FPS", videoMinFps);
+    cmd.AddValue("videoMaxFps", "3GPP video max FPS", videoMaxFps);
+    cmd.AddValue("videoAvgFps", "3GPP video avg FPS", videoAvgFps);
     cmd.AddValue("mmTcPacketSize", "mMTC packet size (bytes)", mmTcPacketSize);
     cmd.AddValue("mmTcInterval", "mMTC interval (s)", mmTcInterval);
     cmd.AddValue("numerology", "NR numerology", numerology);
@@ -182,7 +200,7 @@ int main(int argc, char* argv[])
 
     if (enableLogging)
     {
-        LogComponentEnable("OranSlicingPrb", LOG_LEVEL_INFO);
+        LogComponentEnable("OranSlicingPrbVideo", LOG_LEVEL_INFO);
         LogComponentEnable("NrMacSchedulerOfdmaSliceQos", LOG_LEVEL_DEBUG);
     }
 
@@ -193,7 +211,7 @@ int main(int argc, char* argv[])
     Config::SetDefault("ns3::NrRlcUm::MaxTxBufferSize", UintegerValue(999999999));
     Config::SetDefault("ns3::LteRlcAm::MaxTxBufferSize", UintegerValue(999999999));
 
-    NS_LOG_INFO("=== O-RAN SLICE-AWARE PRB SCHEDULING (1 BWP) ===");
+    NS_LOG_INFO("=== O-RAN SLICE-AWARE PRB SCHEDULING WITH 3GPP VIDEO (1 BWP) ===");
 
     // EPC + Helper setup
     Ptr<NrPointToPointEpcHelper> nrEpcHelper = CreateObject<NrPointToPointEpcHelper>();
@@ -203,14 +221,14 @@ int main(int argc, char* argv[])
     nrHelper->SetBeamformingHelper(idealBeamformingHelper);
     nrHelper->SetEpcHelper(nrEpcHelper);
 
-    // Use the slice-aware scheduler
+    // Use slice-aware scheduler
     nrHelper->SetSchedulerTypeId(
         TypeId::LookupByName("ns3::NrMacSchedulerOfdmaSliceQos"));
 
     // Configure 1 shared BWP
     CcBwpCreator ccBwpCreator;
     CcBwpCreator::SimpleOperationBandConf bandConf(centralFrequency, bandwidth, 1);
-    bandConf.m_numBwp = 1; // Single shared BWP (not 2 like baseline)
+    bandConf.m_numBwp = 1; // Single shared BWP
     OperationBandInfo band = ccBwpCreator.CreateOperationBandContiguousCc(bandConf);
 
     Ptr<NrChannelHelper> channelHelper = CreateObject<NrChannelHelper>();
@@ -350,52 +368,70 @@ int main(int argc, char* argv[])
         g_ipToUeMap[ueMmTcIpIfaces.GetAddress(i)] = ueId;
     }
 
-    // Applications
+    // Applications — DOWNLINK direction to work around NR UL issues
     uint16_t dlPortEmbb = 1234;
-    uint16_t ulPortMmtc = 5678;
+    uint16_t dlPortMmtc = 5678;
     ApplicationContainer serverApps, clientApps;
 
-    // eMBB downlink traffic
+    // eMBB DOWNLINK traffic with 3GPP Generic Video model
+    // remoteHost sends video streams to UEs
     for (uint32_t i = 0; i < ueEmbbNodes.GetN(); ++i)
     {
+        uint16_t port = dlPortEmbb + i;
+
+        // Sink on UE receives DL video packets
         PacketSinkHelper sinkHelper("ns3::UdpSocketFactory",
-                                    InetSocketAddress(Ipv4Address::GetAny(), dlPortEmbb + i));
+                                    InetSocketAddress(Ipv4Address::GetAny(), port));
         serverApps.Add(sinkHelper.Install(ueEmbbNodes.Get(i)));
 
-        UdpClientHelper dlClient(ueEmbbIpIfaces.GetAddress(i), dlPortEmbb + i);
-        dlClient.SetAttribute("MaxPackets", UintegerValue(0xFFFFFFFF));
-        dlClient.SetAttribute("PacketSize", UintegerValue(1400));
-        double interval = 1.0 / (DataRate(embbDataRate).GetBitRate() / (1400.0 * 8.0));
-        dlClient.SetAttribute("Interval", TimeValue(Seconds(interval)));
-        clientApps.Add(dlClient.Install(remoteHost));
+        // 3GPP Generic Video client on remoteHost
+        TrafficGeneratorHelper videoHelper("ns3::UdpSocketFactory",
+                                     InetSocketAddress(ueEmbbIpIfaces.GetAddress(i), port),
+                                     TrafficGenerator3gppGenericVideo::GetTypeId());
+
+        // Configure 3GPP video parameters
+        // Note: MinDataRate, MaxDataRate, DataRate are DoubleValue, not DataRateValue
+        // Convert string to double for Mbps
+        videoHelper.SetAttribute("MinDataRate", DoubleValue(std::stod(videoMinDataRate)));
+        videoHelper.SetAttribute("MaxDataRate", DoubleValue(std::stod(videoMaxDataRate)));
+        videoHelper.SetAttribute("MinFps", UintegerValue(videoMinFps));
+        videoHelper.SetAttribute("MaxFps", UintegerValue(videoMaxFps));
+        videoHelper.SetAttribute("DataRate", DoubleValue(std::stod(videoAvgDataRate)));
+        videoHelper.SetAttribute("Fps", UintegerValue(videoAvgFps));
+
+        clientApps.Add(videoHelper.Install(remoteHost));
 
         // QCI 6 bearer -> maps to slice 0 in scheduler
+        // Use localPort for DOWNLINK traffic
         Ptr<NrEpcTft> embbTft = Create<NrEpcTft>();
         NrEpcTft::PacketFilter embbFilter;
-        embbFilter.localPortStart = dlPortEmbb + i;
-        embbFilter.localPortEnd = dlPortEmbb + i;
+        embbFilter.localPortStart = port;
+        embbFilter.localPortEnd = port;
         embbTft->Add(embbFilter);
         NrEpsBearer embbBearer(NrEpsBearer::NGBR_VIDEO_TCP_OPERATOR);
         nrHelper->ActivateDedicatedEpsBearer(ueEmbbDevs.Get(i), embbBearer, embbTft);
     }
 
-    // mMTC traffic (downlink, same as baseline workaround)
+    // mMTC DOWNLINK traffic using UDP (simple sensor data)
+    // remoteHost sends sensor data to UEs
     for (uint32_t i = 0; i < ueMmTcNodes.GetN(); ++i)
     {
-        uint16_t port = ulPortMmtc + i;
-        Ipv4Address ueAddr = ueMmTcIpIfaces.GetAddress(i);
+        uint16_t port = dlPortMmtc + i;
 
+        // Sink on UE receives DL packets
         PacketSinkHelper sinkHelper("ns3::UdpSocketFactory",
                                     InetSocketAddress(Ipv4Address::GetAny(), port));
         serverApps.Add(sinkHelper.Install(ueMmTcNodes.Get(i)));
 
-        UdpClientHelper dlClient(ueAddr, port);
+        // UDP client on remoteHost sends sensor data to UE
+        UdpClientHelper dlClient(ueMmTcIpIfaces.GetAddress(i), port);
         dlClient.SetAttribute("MaxPackets", UintegerValue(0xFFFFFFFF));
         dlClient.SetAttribute("PacketSize", UintegerValue(mmTcPacketSize));
         dlClient.SetAttribute("Interval", TimeValue(Seconds(mmTcInterval)));
         clientApps.Add(dlClient.Install(remoteHost));
 
         // QCI 80 bearer -> maps to slice 1 in scheduler
+        // Use localPort for DOWNLINK traffic
         Ptr<NrEpcTft> mmtcTft = Create<NrEpcTft>();
         NrEpcTft::PacketFilter mmtcFilter;
         mmtcFilter.localPortStart = port;
@@ -583,8 +619,18 @@ int main(int argc, char* argv[])
     sumOut << "    \"mmTcUes\": " << nMmTcUes << ",\n";
     sumOut << "    \"scheduler\": \"ns3::NrMacSchedulerOfdmaSliceQos\",\n";
     sumOut << "    \"bwpConfiguration\": \"" << bwpStr << "\",\n";
-    sumOut << "    \"sliceImplementation\": \"slice_aware_rbg\",\n";
-    sumOut << "    \"note\": \"1 BWP shared, slice-aware RBG partitioning at MAC\"\n";
+    sumOut << "    \"sliceImplementation\": \"slice_aware_rbg_3gpp_video\",\n";
+    sumOut << "    \"note\": \"1 BWP shared, slice-aware RBG partitioning at MAC, 3GPP video model\"\n";
+    sumOut << "  },\n";
+    sumOut << "  \"videoTraffic\": {\n";
+    sumOut << "    \"model\": \"3GPP TR 38.838 Generic Video\",\n";
+    sumOut << "    \"direction\": \"DOWNLINK\",\n";
+    sumOut << "    \"minDataRate\": \"" << videoMinDataRate << "\",\n";
+    sumOut << "    \"maxDataRate\": \"" << videoMaxDataRate << "\",\n";
+    sumOut << "    \"avgDataRate\": \"" << videoAvgDataRate << "\",\n";
+    sumOut << "    \"minFps\": " << videoMinFps << ",\n";
+    sumOut << "    \"maxFps\": " << videoMaxFps << ",\n";
+    sumOut << "    \"avgFps\": " << videoAvgFps << "\n";
     sumOut << "  },\n";
     sumOut << "  \"slicePolicy\": {\n";
     sumOut << "    \"staticPortion\": 0.5,\n";
@@ -627,10 +673,11 @@ int main(int argc, char* argv[])
     sumOut << "  },\n";
     sumOut << "  \"limitations\": [\n";
     sumOut << "    \"RBG-level granularity (not PRB-level) - native 5G-LENA constraint\",\n";
-    sumOut << "    \"Slice-aware DL only; UL uses base QoS scheduler\",\n";
+    sumOut << "    \"Slice-aware DL and UL with RSLAQ work-conserving policy\",\n";
     sumOut << "    \"2 slices maximum in this implementation\",\n";
     sumOut << "    \"No DRL/xApp integration yet - parameters set at startup\",\n";
-    sumOut << "    \"Metrics from FlowMonitor (IP layer), not MAC/PHY level\"\n";
+    sumOut << "    \"Metrics from FlowMonitor (IP layer), not MAC/PHY level\",\n";
+    sumOut << "    \"3GPP video model: uses DOWNLINK to work around NR UL issues\"\n";
     sumOut << "  ],\n";
     sumOut << "  \"technicalNotes\": {\n";
     sumOut << "    \"scheduler\": \"NrMacSchedulerOfdmaSliceQos\",\n";
@@ -638,18 +685,21 @@ int main(int argc, char* argv[])
     sumOut << "    \"sliceIdentification\": \"QCI-based (eMBB:QCI=6, mMTC:QCI=80)\",\n";
     sumOut << "    \"resourcePartitioning\": \"50% static (weighted) + 50% dynamic\",\n";
     sumOut << "    \"workConserving\": true,\n";
-    sumOut << "    \"drlReady\": \"SetSliceStaticWeight / SetSliceDynamicShare for xApp\"\n";
+    sumOut << "    \"drlReady\": \"SetSliceStaticWeight / SetSliceDynamicShare for xApp\",\n";
+    sumOut << "    \"videoModel\": \"3GPP TR 38.838 V17.0.0 generic video\",\n";
+    sumOut << "    \"trafficDirection\": \"DOWNLINK (remoteHost->UE) due to NR UL limitations\"\n";
     sumOut << "  }\n";
     sumOut << "}\n";
     sumOut.close();
 
     // Console
     std::cout << "\n=================================================================\n";
-    std::cout << "O-RAN SLICE-AWARE PRB SCHEDULING - SUMMARY\n";
+    std::cout << "O-RAN SLICE-AWARE PRB SCHEDULING WITH 3GPP VIDEO - SUMMARY\n";
     std::cout << "=================================================================\n";
     std::cout << "Time: " << simTime << "s | Run: " << runNumber << "\n";
     std::cout << "UEs: " << nUes << " (eMBB:" << nEmbbUes << " mMTC:" << nMmTcUes << ")\n";
     std::cout << "BWP: " << bwpStr << " shared | Scheduler: SliceQos\n";
+    std::cout << "Video: 3GPP Model | " << videoAvgDataRate << " avg @ " << videoAvgFps << " FPS\n";
     std::cout << "Shares: eMBB=" << (embbStaticWeight * 0.5 + embbDynamicShare * 0.5)
               << " mMTC=" << (mmtcStaticWeight * 0.5 + mmtcDynamicShare * 0.5) << "\n\n";
     std::cout << "eMBB: TP=" << embbTp << " Mbps (" << embbTpUe << " Mbps/UE)"

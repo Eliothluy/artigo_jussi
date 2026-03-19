@@ -2,16 +2,26 @@
   "simulation": {
     "seed": 1,
     "runNumber": 1,
-    "durationSeconds": 2
+    "durationSeconds": 10
   },
   "configuration": {
-    "totalUes": 4,
-    "embbUes": 2,
-    "mmTcUes": 2,
+    "totalUes": 20,
+    "embbUes": 10,
+    "mmTcUes": 10,
     "scheduler": "ns3::NrMacSchedulerOfdmaSliceQos",
-    "bwpConfiguration": "1x20MHz",
-    "sliceImplementation": "slice_aware_rbg",
-    "note": "1 BWP shared, slice-aware RBG partitioning at MAC"
+    "bwpConfiguration": "1x198MHz",
+    "sliceImplementation": "slice_aware_rbg_3gpp_video",
+    "note": "1 BWP shared, slice-aware RBG partitioning at MAC, 3GPP video model"
+  },
+  "videoTraffic": {
+    "model": "3GPP TR 38.838 Generic Video",
+    "direction": "DOWNLINK",
+    "minDataRate": "5Mbps",
+    "maxDataRate": "10Mbps",
+    "avgDataRate": "7.5Mbps",
+    "minFps": 30,
+    "maxFps": 60,
+    "avgFps": 30
   },
   "slicePolicy": {
     "staticPortion": 0.5,
@@ -24,38 +34,39 @@
     "mmtcEffectiveShare": 0.5
   },
   "eMBB": {
-    "throughputAggregatedMbps": 48.095,
-    "throughputPerUeMbps": 24.0475,
-    "avgLatencyMs": 13.5608,
-    "packetDeliveryRatio": 0.992456,
-    "packetLossRatio": 0.00754361,
-    "activeFlows": 2,
-    "totalTxBytes": 12115152,
-    "totalRxBytes": 12023760
+    "throughputAggregatedMbps": 74.3678,
+    "throughputPerUeMbps": 7.43678,
+    "avgLatencyMs": 11.664,
+    "packetDeliveryRatio": 0.998992,
+    "packetLossRatio": 0.0010084,
+    "activeFlows": 10,
+    "totalTxBytes": 93053765,
+    "totalRxBytes": 92959693
   },
   "mMTC": {
-    "throughputAggregatedMbps": 0.002048,
-    "avgLatencyMs": 16.2786,
+    "throughputAggregatedMbps": 0.01024,
+    "avgLatencyMs": 11.2846,
     "packetDeliveryRatio": 1,
     "packetLossRatio": 0,
-    "activeFlows": 2,
-    "totalTxBytes": 512,
-    "totalRxBytes": 512
+    "activeFlows": 10,
+    "totalTxBytes": 12800,
+    "totalRxBytes": 12800
   },
   "slaVerification": {
-    "embbThroughputTargetMbps": 25,
-    "embbThroughputPerUeMbps": 24.0475,
+    "embbThroughputTargetMbps": 7.5,
+    "embbThroughputPerUeMbps": 7.43678,
     "embbThroughputSlaMet": false,
     "embbLatencyTargetMs": 100,
-    "embbLatencyMs": 13.5608,
+    "embbLatencyMs": 11.664,
     "embbLatencySlaMet": true
   },
   "limitations": [
     "RBG-level granularity (not PRB-level) - native 5G-LENA constraint",
-    "Slice-aware DL only; UL uses base QoS scheduler",
+    "Slice-aware DL and UL with RSLAQ work-conserving policy",
     "2 slices maximum in this implementation",
     "No DRL/xApp integration yet - parameters set at startup",
-    "Metrics from FlowMonitor (IP layer), not MAC/PHY level"
+    "Metrics from FlowMonitor (IP layer), not MAC/PHY level",
+    "3GPP video model: uses DOWNLINK to work around NR UL issues"
   ],
   "technicalNotes": {
     "scheduler": "NrMacSchedulerOfdmaSliceQos",
@@ -63,6 +74,8 @@
     "sliceIdentification": "QCI-based (eMBB:QCI=6, mMTC:QCI=80)",
     "resourcePartitioning": "50% static (weighted) + 50% dynamic",
     "workConserving": true,
-    "drlReady": "SetSliceStaticWeight / SetSliceDynamicShare for xApp"
+    "drlReady": "SetSliceStaticWeight / SetSliceDynamicShare for xApp",
+    "videoModel": "3GPP TR 38.838 V17.0.0 generic video",
+    "trafficDirection": "DOWNLINK (remoteHost->UE) due to NR UL limitations"
   }
 }

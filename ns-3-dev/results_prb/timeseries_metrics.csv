@@ -1,3 +1,0 @@
-timestampSeconds,sliceId,sliceName,throughputMbps,avgDelayMs,packetLossRatio,txBytes,rxBytes,txPackets,rxPackets,activeUes
-10,0,eMBB,70.6974,3588.57,0.719965,315573720,88371780,220990,61885,10
-10,1,mMTC,0.01024,14.9928,0,12800,12800,100,100,10
