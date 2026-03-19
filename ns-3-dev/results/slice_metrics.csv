@@ -1,3 +1,3 @@
 sliceId,sliceName,bwpId,throughputAggregatedMbps,throughputPerUeMbps,avgLatencyMs,packetDeliveryRatio,packetLossRatio,activeFlows,totalTxBytes,totalRxBytes
-0,eMBB,0,24.1892,24.1892,13.5297,0.998491,0.00150901,1,30282168,30236472
-1,mMTC,0,0,0,0,0,1,0,25344,0
+0,eMBB,0,24.0475,24.0475,13.5614,0.992456,0.00754361,1,6057576,6011880
+1,mMTC,1,0.001024,0.001024,29.0286,1,0,1,256,256

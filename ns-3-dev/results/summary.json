@@ -2,12 +2,12 @@
   "simulation": {
     "seed": 1,
     "runNumber": 1,
-    "durationSeconds": 10
+    "durationSeconds": 2
   },
   "configuration": {
-    "totalUes": 3,
+    "totalUes": 2,
     "embbUes": 1,
-    "mmTcUes": 2,
+    "mmTcUes": 1,
     "ueDistanceMeters": 100,
     "embbDataRateMbps": 25,
     "mmTcPacketSizeBytes": 100,
@@ -15,54 +15,53 @@
     "numerology": 0,
     "totalTxPowerDbm": 43,
     "scheduler": "ns3::NrMacSchedulerOfdmaQos",
-    "bwpConfiguration": "10MHz@3.495GHz",
-    "sliceImplementation": "physical_separation_via_multi_bwp_and_qos_bearers",
-    "note": "Multi-BWP (2x) with 50% static resource allocation - RSLAQ compliant"
+    "bwpConfiguration": "2x10MHz@3.495GHz",
+    "sliceImplementation": "real_bwp_qos_bearer",
+    "note": "Multi-BWP (2x) with 50% static resource allocation - RSLAQ compliant. eMBB uses QCI=6 (NGBR_VIDEO_TCP_OPERATOR) mapped to BWP 0. mMTC uses QCI=80 (NGBR_LOW_LAT_EMBB) mapped to BWP 1."
   },
   "drlControl": {
-    "embbResourceShare": 0.8,
-    "mmtcResourceShare": 0.2,
+    "embbResourceShare": 0.5,
+    "mmtcResourceShare": 0.5,
     "schedulerMode": "qos",
     "note": "These are placeholder values - DRL integration not implemented yet"
   },
   "eMBB": {
-    "throughputAggregatedMbps": 24.1892,
-    "throughputPerUeMbps": 24.1892,
-    "avgLatencyMs": 13.5297,
-    "packetDeliveryRatio": 0.998491,
-    "packetLossRatio": 0.00150901,
+    "throughputAggregatedMbps": 24.0475,
+    "throughputPerUeMbps": 24.0475,
+    "avgLatencyMs": 13.5614,
+    "packetDeliveryRatio": 0.992456,
+    "packetLossRatio": 0.00754361,
     "activeFlows": 1,
-    "totalTxBytes": 30282168,
-    "totalRxBytes": 30236472,
-    "slaCompliance": {
-      "throughput25MbpsMet": false,
-      "latency100MsMet": true
-    }
+    "totalTxBytes": 6057576,
+    "totalRxBytes": 6011880,
+    "qci": 6,
+    "qciName": "NGBR_VIDEO_TCP_OPERATOR",
+    "bwpId": 0
   },
   "mMTC": {
-    "throughputAggregatedMbps": 0,
-    "throughputPerUeKbps": 0,
-    "avgLatencyMs": 0,
-    "packetDeliveryRatio": 0,
-    "packetLossRatio": 1,
-    "activeFlows": 0,
-    "totalTxBytes": 25344,
-    "totalRxBytes": 0
-  },
-  "slicingImplementation": {
-    "type": "logical_separation",
-    "isolation": "qos_bearers_and_ue_groups",
-    "notes": [
-      "Multi-BWP (2x) with physical isolation - RSLAQ compliant",
-      "50% static resource allocation per slice (10 MHz each)",
-      "QoS bearer mapping (NGBR_VIDEO for eMBB, GBR_CONV_VOICE for mMTC)",
-      "BWP Manager Algorithm Static for QCI-to-BWP mapping",
-      "DRL/xApp integration not yet implemented"
-    ]
+    "throughputAggregatedMbps": 0.001024,
+    "throughputPerUeKbps": 1.024,
+    "avgLatencyMs": 29.0286,
+    "packetDeliveryRatio": 1,
+    "packetLossRatio": 0,
+    "activeFlows": 1,
+    "totalTxBytes": 256,
+    "totalRxBytes": 256,
+    "qci": 80,
+    "qciName": "NGBR_LOW_LAT_EMBB",
+    "bwpId": 1
   },
   "limitations": [
-    "Physical isolation at BWP level, but no dynamic resource allocation",
+    "Physical isolation at BWP level with static QCI-to-BWP mapping",
+    "No dynamic resource allocation - static 50/50 split",
     "No native DRL/xApp integration in this baseline",
-    "Metrics are from IP layer (FlowMonitor) - not MAC/PHY level"
-  ]
+    "Metrics are from IP layer (FlowMonitor) - not MAC/PHY level",
+    "mMTC traffic uses DOWNLINK (remoteHost->UE) due to uplink NR issues in this nr-module version"
+  ],
+  "technicalNotes": {
+    "bwpMapping": "eMBB: QCI=6 -> BWP0, mMTC: QCI=80 -> BWP1",
+    "uplinkIssue": "NR uplink traffic generation has issues with dedicated bearers - mMTC uses downlink as workaround",
+    "qosScheduler": "NrMacSchedulerOfdmaQos with static QCI-to-BWP mapping",
+    "drlReady": "Control params exposed (embbResourceShare, mmtcResourceShare) for future xApp integration"
+  }
 }

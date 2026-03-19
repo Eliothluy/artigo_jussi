@@ -1,2 +1,3 @@
-timestampSeconds,sliceId,sliceName,activeFlows,rxBytesCumulative,txBytesCumulative,windowThroughputMbps,avgDelayMs,packetLossRatio
-NOTE: Time-series not implemented in this version - set m_numBwp > 1 and implement sampling for future versions
+timestampSeconds,sliceId,sliceName,bwpId,throughputMbps,avgDelayMs,packetLossRatio,txBytes,rxBytes,txPackets,rxPackets,activeFlows,activeUes
+2,0,eMBB,0,24.0475,13.5614,0.00754361,6057576,6011880,4242,4210,1,1
+2,1,mMTC,1,0.001024,29.0286,0,256,256,2,2,1,1
