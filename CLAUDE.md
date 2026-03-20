@@ -16,6 +16,7 @@ This is a research codebase for simulating O-RAN (Open Radio Access Network) and
   - `oran_slicing_bwp.cc`: O-RAN aligned network slicing with BWP-based physical isolation (RSLAQ compliant) - 2 BWPs
   - `oran_slicing_prb.cc`: Slice-aware PRB/RBG scheduling with 1 shared BWP and MAC-level slicing
   - `baseline_slicing_two_slices_fixed.cc`: Baseline 5G-LENA simulation without RIC components
+- **docs/**: Implementation reports and technical documentation
 
 ## Build System
 
@@ -38,7 +39,7 @@ This is a research codebase for simulating O-RAN (Open Radio Access Network) and
 ./ns3 run scratch/baseline_slicing_two_slices_fixed
 ```
 
-The `ns3` tool is a custom wrapper around CMake that provides a Waf-like API.
+The `ns3` tool is a custom Python wrapper around CMake that provides a Waf-like API.
 
 ### e2sim Build Commands (from `oran-e2sim/e2sim/` directory)
 
@@ -112,6 +113,8 @@ Slice Types:
 
 4. **Trace Files**: Simulations generate `.txt` trace files and `.pcap` files in the working directory. The `default` file contains flow monitor output, not configuration.
 
+5. **Uplink NR Limitation**: The nr-module v4.1.1 has known uplink issues with dedicated bearers. Current workarounds use downlink traffic for mMTC. See `docs/implementacao_oran_slicing_bwp.md` for details.
+
 ## Code Style
 
 - **Namespace**: All code uses `ns3` namespace
@@ -168,6 +171,13 @@ Example format:
 ./test.py -v
 ```
 
+### Code Formatting
+
+```bash
+# Format a specific file
+./utils/check-style-clang-format.py --fix <file>
+```
+
 ## Dependencies
 
 ### Custom Scheduler: NrMacSchedulerOfdmaSliceQos
@@ -210,3 +220,4 @@ sudo apt-get install libeigen3-dev       # For MIMO features
 - **NR Tutorial**: `contrib/nr/doc/cttc-nr-demo-tutorial.pdf`
 - **ORAN Quick Start**: https://openrangym.com/tutorials/ns-o-ran
 - **ns-3 Documentation**: https://www.nsnam.org/documentation/
+- **Implementation Report**: `docs/implementacao_oran_slicing_bwp.md`
