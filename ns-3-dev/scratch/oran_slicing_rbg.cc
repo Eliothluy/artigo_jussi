@@ -295,9 +295,9 @@ main(int argc, char* argv[])
     uint32_t nIotUes = 10;
     double ueDistance = 100.0;
 
-    std::string videoMinDataRate = "5Mbps";
-    std::string videoMaxDataRate = "10Mbps";
-    std::string videoAvgDataRate = "7.5Mbps";
+    std::string videoMinDataRate = "17Mbps";
+    std::string videoMaxDataRate = "33Mbps";
+    std::string videoAvgDataRate = "25Mbps";
     uint32_t videoMinFps = 30;
     uint32_t videoMaxFps = 60;
     uint32_t videoAvgFps = 30;
@@ -323,7 +323,7 @@ main(int argc, char* argv[])
     double iotStaticWeight = 0.5;
     double embbDynamicShare = 0.5;
     double iotDynamicShare = 0.5;
-    double embbSlaThroughputMbps = 7.5;
+    double embbSlaThroughputMbps = 25.0;
     double embbSlaLatencyMs = 100.0;
     
     CommandLine cmd(__FILE__);
