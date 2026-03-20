@@ -9,3 +9,6 @@
 !baseline_slicing_two_slices_fixed.cc
 !oran_slicing_bwp.cc
 !oran_slicing_prb.cc
+!oran_slicing_rbg.cc
+!ric_xapp_simple.py
+!simple_ric.cpp
