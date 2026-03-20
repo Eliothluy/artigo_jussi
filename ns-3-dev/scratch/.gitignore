@@ -6,3 +6,6 @@
 !subdir/
 !scratch-simulator.cc
 !CMakeLists.txt
+!baseline_slicing_two_slices_fixed.cc
+!oran_slicing_bwp.cc
+!oran_slicing_prb.cc
