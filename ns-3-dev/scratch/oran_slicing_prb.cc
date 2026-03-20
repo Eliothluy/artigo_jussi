@@ -693,9 +693,9 @@ int main(int argc, char* argv[])
     sumOut.close();
 
     // Console
-    std::cout << "\n=================================================================\n";
+    std::cout << "\n";
     std::cout << "O-RAN SLICE-AWARE PRB SCHEDULING WITH 3GPP VIDEO - SUMMARY\n";
-    std::cout << "=================================================================\n";
+    std::cout << "\n";
     std::cout << "Time: " << simTime << "s | Run: " << runNumber << "\n";
     std::cout << "UEs: " << nUes << " (eMBB:" << nEmbbUes << " mMTC:" << nMmTcUes << ")\n";
     std::cout << "BWP: " << bwpStr << " shared | Scheduler: SliceQos\n";
@@ -709,7 +709,7 @@ int main(int argc, char* argv[])
     std::cout << "mMTC: TP=" << mmtcTp << " Mbps"
               << " Lat=" << mmtcLat << " ms PDR=" << (mmtcPdr * 100) << "%\n\n";
     std::cout << "Files: " << outputDir << "/{ue_metrics,slice_metrics,timeseries_metrics,summary}.csv/.json\n";
-    std::cout << "=================================================================\n";
+    std::cout << "\n";
 
     return 0;
 }
