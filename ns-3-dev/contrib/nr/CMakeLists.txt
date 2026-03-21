@@ -155,6 +155,7 @@ set(source_files
     model/nr-mac-scheduler-ofdma-pf.cc
     model/nr-mac-scheduler-ofdma-qos.cc
     model/nr-mac-scheduler-ofdma-slice-qos.cc
+    model/nr-mac-scheduler-ofdma-slice-prb.cc
     model/nr-mac-scheduler-ofdma-rr.cc
     model/nr-mac-scheduler-ofdma-symbol-per-beam.cc
     model/nr-mac-scheduler-ofdma-random.cc
@@ -359,6 +360,7 @@ set(header_files
     model/nr-mac-scheduler-ofdma-pf.h
     model/nr-mac-scheduler-ofdma-qos.h
     model/nr-mac-scheduler-ofdma-slice-qos.h
+    model/nr-mac-scheduler-ofdma-slice-prb.h
     model/nr-mac-scheduler-ofdma-rr.h
     model/nr-mac-scheduler-ofdma-symbol-per-beam.h
     model/nr-mac-scheduler-ofdma-random.h

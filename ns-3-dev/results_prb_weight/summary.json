@@ -1,0 +1,98 @@
+{
+  "simulation": {
+    "seed": 1,
+    "runNumber": 1,
+    "durationSeconds": 5,
+    "appDurationSeconds": 4.9
+  },
+  "configuration": {
+    "totalUes": 20,
+    "embbUes": 10,
+    "iotUes": 10,
+    "scheduler": "ns3::NrMacSchedulerOfdmaSlicePrb",
+    "bwpConfiguration": "1x200MHz",
+    "sliceImplementation": "xApp_weight_to_prb_quota",
+    "note": "1 BWP shared, xApp sends abstract weights, scheduler converts to PRB quotas at MAC"
+  },
+  "radioConfiguration": {
+    "numerology": 2,
+    "subcarrierSpacingKhz": 60,
+    "centralFrequencyGHz": 3.5,
+    "bandwidthMHz": 200,
+    "note": "60 kHz subcarrier spacing (mu=2). 200 MHz at 3.5 GHz is experimental configuration"
+  },
+  "prbPolicy": {
+    "embbPrbQuota": 136,
+    "mmtcPrbQuota": 137,
+    "totalPrbQuota": 273,
+    "embbPrbFraction": 0.498168,
+    "mmtcPrbFraction": 0.501832,
+    "xAppControlMechanism": "abstract_weights_converted_to_prb_quotas",
+    "weightToPrbFormula": "prbQuota = totalPrbs * weight"
+  },
+  "videoTraffic": {
+    "model": "3GPP TR 38.838 Generic Video",
+    "direction": "DOWNLINK",
+    "minDataRateMbps": "1Mbps",
+    "maxDataRateMbps": "2Mbps",
+    "avgDataRateMbps": "1.5Mbps",
+    "minFps": 30,
+    "maxFps": 60,
+    "avgFps": 30
+  },
+  "iotTraffic": {
+    "type": "Low-latency UDP",
+    "note": "IoT-like sensor data simulation, not mMTC mass IoT",
+    "packetSizeBytes": 100,
+    "intervalSeconds": 1
+  },
+  "eMBB": {
+    "throughputAggregatedMbps": 15.0682,
+    "throughputPerUeMbps": 1.50682,
+    "avgLatencyMs": 11.0389,
+    "packetDeliveryRatio": 0.995935,
+    "packetLossRatio": 0.00406504,
+    "activeFlows": 10,
+    "totalTxBytes": 9266922,
+    "totalRxBytes": 9229264
+  },
+  "iot": {
+    "throughputAggregatedMbps": 0.010449,
+    "avgLatencyMs": 11.4871,
+    "packetDeliveryRatio": 1,
+    "packetLossRatio": 0,
+    "activeFlows": 10,
+    "totalTxBytes": 6400,
+    "totalRxBytes": 6400
+  },
+  "slaVerification": {
+    "embbThroughputTargetMbps": 1,
+    "embbThroughputPerUeMbps": 1.50682,
+    "embbThroughputSlaMet": true,
+    "embbLatencyTargetMs": 100,
+    "embbLatencyMs": 11.0389,
+    "embbLatencySlaMet": true
+  },
+  "e2Integration": {
+    "enabled": false,
+    "mode": "disabled",
+    "note": "E2/O-RAN: xApp sends abstract weights, scheduler converts to PRB quotas (O-RAN E2SM-RC 8.4.3.6)"
+  },
+  "technicalNotes": {
+    "scheduler": "NrMacSchedulerOfdmaSlicePrb",
+    "inheritance": "NrMacSchedulerOfdmaRR -> NrMacSchedulerOfdmaQos -> SlicePrb",
+    "sliceIdentification": "QCI-based (eMBB:QCI=6, IoT:QCI=80)",
+    "resourcePartitioning": "xApp weight -> PRB hard quota (SetSliceStaticWeight)",
+    "prbToRbgConversion": "ceil(prbQuota / prbPerRbg)",
+    "workConserving": true,
+    "granularity": "PRB (Physical Resource Block)",
+    "xAppInterface": "SetSliceStaticWeight(slice, weight) - same as RBG scenario",
+    "schedulerConversion": "SetSliceStaticWeight -> totalPrbs * weight = prbQuota",
+    "standardsCompliance": [
+      "3GPP TS 28.552 (PRB usage measurements)",
+      "3GPP TS 38.314 (Layer 2 PRB measurements)",
+      "O-RAN E2SM-RC 8.4.3.6 (Slice-level PRB quota)"
+    ],
+    "externalControl": "SetSliceStaticWeight/SetSliceDynamicShare APIs (weight->PRB conversion)"
+  }
+}

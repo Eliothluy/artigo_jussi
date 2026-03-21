@@ -2,40 +2,54 @@
   "simulation": {
     "seed": 1,
     "runNumber": 1,
-    "durationSeconds": 10
+    "durationSeconds": 10,
+    "appDurationSeconds": 9.9,
   },
   "configuration": {
     "totalUes": 20,
     "embbUes": 10,
-    "mmTcUes": 10,
+    "iotUes": 10,
     "scheduler": "ns3::NrMacSchedulerOfdmaSliceQos",
-    "bwpConfiguration": "1x198MHz",
-    "sliceImplementation": "slice_aware_rbg_3gpp_video",
+    "bwpConfiguration": "1x200MHz",
+    "sliceImplementation": "slice_aware_rbg_partitioning",
     "note": "1 BWP shared, slice-aware RBG partitioning at MAC, 3GPP video model"
+  },
+  "radioConfiguration": {
+    "numerology": 2,
+    "subcarrierSpacingKhz": 60,
+    "centralFrequencyGHz": 3.5,
+    "bandwidthMHz": 200,
+    "note": "60 kHz subcarrier spacing (µ=2). 200 MHz at 3.5 GHz is experimental configuration, not a standard 3GPP band definition"
   },
   "videoTraffic": {
     "model": "3GPP TR 38.838 Generic Video",
     "direction": "DOWNLINK",
-    "minDataRate": "5Mbps",
-    "maxDataRate": "10Mbps",
-    "avgDataRate": "7.5Mbps",
+    "minDataRateMbps": "5Mbps",
+    "maxDataRateMbps": "10Mbps",
+    "avgDataRateMbps": "7.5Mbps",
     "minFps": 30,
     "maxFps": 60,
     "avgFps": 30
+  },
+  "iotTraffic": {
+    "type": "Low-latency UDP",
+    "note": "IoT-like sensor data simulation, not mMTC mass IoT",
+    "packetSizeBytes": 100,
+    "intervalSeconds": 1
   },
   "slicePolicy": {
     "staticPortion": 0.5,
     "dynamicPortion": 0.5,
     "embbStaticWeight": 0.5,
-    "mmtcStaticWeight": 0.5,
+    "iotStaticWeight": 0.5,
     "embbDynamicShare": 0.5,
-    "mmtcDynamicShare": 0.5,
+    "iotDynamicShare": 0.5,
     "embbEffectiveShare": 0.5,
-    "mmtcEffectiveShare": 0.5
+    "iotEffectiveShare": 0.5
   },
   "eMBB": {
-    "throughputAggregatedMbps": 74.3678,
-    "throughputPerUeMbps": 7.43678,
+    "throughputAggregatedMbps": 75.1189,
+    "throughputPerUeMbps": 7.51189,
     "avgLatencyMs": 11.664,
     "packetDeliveryRatio": 0.998992,
     "packetLossRatio": 0.0010084,
@@ -43,8 +57,8 @@
     "totalTxBytes": 93053765,
     "totalRxBytes": 92959693
   },
-  "mMTC": {
-    "throughputAggregatedMbps": 0.01024,
+  "iot": {
+    "throughputAggregatedMbps": 0.0103434,
     "avgLatencyMs": 11.2846,
     "packetDeliveryRatio": 1,
     "packetLossRatio": 0,
@@ -54,28 +68,41 @@
   },
   "slaVerification": {
     "embbThroughputTargetMbps": 7.5,
-    "embbThroughputPerUeMbps": 7.43678,
-    "embbThroughputSlaMet": false,
+    "embbThroughputPerUeMbps": 7.51189,
+    "embbThroughputSlaMet": true,
     "embbLatencyTargetMs": 100,
     "embbLatencyMs": 11.664,
     "embbLatencySlaMet": true
   },
+  "e2Integration": {
+    "enabled": false,
+    "mode": "disabled",
+    "note": "E2/O-RAN telemetry implemented with KPM indications and RIC control (observability-enabled, no closed-loop without external RIC/xApp)"
+  },
+  "qciTo5qiMapping": {
+    "qci6": "NGBR_VIDEO_TCP_OPERATOR",
+    "5qiEquivalent": "~5QI 6-9 (video streaming)",
+    "qci80": "NGBR_LOW_LAT_EMBB",
+    "5qiEquivalent": "~5QI 5 (low-latency eMBB/IoT)",
+    "note": "ns-3 NR uses QCI (EPS/LTE) inherited from EPS. Full 5GS 5QI support requires QoS Flow architecture not yet implemented"
+  },
   "limitations": [
     "RBG-level granularity (not PRB-level) - native 5G-LENA constraint",
-    "Slice-aware DL and UL with RSLAQ work-conserving policy",
-    "2 slices maximum in this implementation",
-    "No DRL/xApp integration yet - parameters set at startup",
+    "Slice ID (S-NSSAI) not natively supported - using QCI as proxy",
+    "5QI not natively supported - using QCI with documented 5QI equivalence",
+    "Maximum 2 slices in this scheduler implementation",
+    "Work-conserving resources may not respect strict SLA guarantees",
+    "IoT traffic simplified (UDP periodic), not full mMTC model",
     "Metrics from FlowMonitor (IP layer), not MAC/PHY level",
-    "3GPP video model: uses DOWNLINK to work around NR UL issues"
+    "3GPP video model uses DOWNLINK to work around NR UL limitations"
   ],
   "technicalNotes": {
     "scheduler": "NrMacSchedulerOfdmaSliceQos",
     "inheritance": "NrMacSchedulerOfdmaRR -> NrMacSchedulerOfdmaQos -> SliceQos",
-    "sliceIdentification": "QCI-based (eMBB:QCI=6, mMTC:QCI=80)",
+    "sliceIdentification": "QCI-based (eMBB:QCI=6, IoT:QCI=80)",
     "resourcePartitioning": "50% static (weighted) + 50% dynamic",
     "workConserving": true,
-    "drlReady": "SetSliceStaticWeight / SetSliceDynamicShare for xApp",
-    "videoModel": "3GPP TR 38.838 V17.0.0 generic video",
-    "trafficDirection": "DOWNLINK (remoteHost->UE) due to NR UL limitations"
+    "granularity": "RBG (Resource Block Group)",
+    "externalControl": "SetSliceStaticWeight/SetSliceDynamicShare APIs exposed for RIC"
   }
 }
